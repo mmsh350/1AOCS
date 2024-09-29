@@ -14,7 +14,7 @@ class ContactController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:contacts,email',
+            'email' => 'required|email',
             'phone' => 'required|string|max:15',
             'title' => 'required|string|max:100',
             'message' => 'required|string|max:1000',
@@ -23,7 +23,7 @@ class ContactController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'responseCode' => '01',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 400);
         }
 
@@ -39,7 +39,7 @@ class ContactController extends Controller
             return response()->json([
                 'responseCode' => '00',
                 'message' => 'Contact saved successfully',
-                'contact' => $contact
+                'contact' => $contact,
             ], 201);
 
         } catch (\Exception $e) {
@@ -66,26 +66,25 @@ class ContactController extends Controller
         //         'error' => $e->getMessage(),
         //     ], 500);
         // }
-    try {
-        // Get the number of items per page from the request or default to 10
-        $perPage = $request->query('per_page', 10);
+        try {
+            // Get the number of items per page from the request or default to 10
+            $perPage = $request->query('per_page', 10);
 
-        // Paginate contacts
-        $contacts = Contact::paginate($perPage);
+            // Paginate contacts
+            $contacts = Contact::paginate($perPage);
 
-        return response()->json([
-            'responseCode' => '00',
-            'message' => 'Contacts retrieved successfully',
-            'contacts' => $contacts
-        ], 200);
-    } catch (Exception $e) {
-        return response()->json([
-            'responseCode' => '01',
-            'message' => 'Failed to fetch contacts',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-
+            return response()->json([
+                'responseCode' => '00',
+                'message' => 'Contacts retrieved successfully',
+                'contacts' => $contacts,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'responseCode' => '01',
+                'message' => 'Failed to fetch contacts',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
 
     }
 
@@ -94,9 +93,10 @@ class ContactController extends Controller
     {
         try {
             $contact = Contact::findOrFail($id);
+
             return response()->json([
                 'responseCode' => '00',
-                'contact' => $contact
+                'contact' => $contact,
             ], 200);
 
         } catch (\Exception $e) {
@@ -116,7 +116,7 @@ class ContactController extends Controller
 
             return response()->json([
                 'responseCode' => '00',
-                'message' => 'Contact deleted successfully'
+                'message' => 'Contact deleted successfully',
             ], 200);
 
         } catch (\Exception $e) {
@@ -125,5 +125,57 @@ class ContactController extends Controller
                 'error' => $e->getMessage(),
             ], 404);
         }
+    }
+
+    public function getCount(Request $request)
+    {
+        try {
+
+            $total_messages = Contact::count(); // Count all messages
+            $read_messages = Contact::where('status', 'read')->count(); // Count only read messages
+            $unread_messages = Contact::where('status', 'unread')->count(); // Count only unread messages
+
+            return response()->json([
+                'responseCode' => '00',
+                'message' => 'Message Count Received successfully',
+                'message_count' => [
+                    'total' => $total_messages,
+                    'read' => $read_messages,
+                    'unread' => $unread_messages,
+                ],
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'responseCode' => '01',
+                'message' => 'Failed to fetch contacts',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function markAsRead($id)
+    {
+        try {
+            // Find the message by its ID
+            $message = Contact::findOrFail($id);
+
+            // Update the message status to 'read'
+            $message->status = 'read';
+            $message->save();
+
+            return response()->json([
+                'responseCode' => '00',
+                'message' => 'Message marked as read successfully',
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'responseCode' => '01',
+                'message' => 'Message not found',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+
     }
 }

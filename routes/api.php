@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,14 +20,15 @@ use App\Http\Controllers\ContactController;
 //     return $request->user();
 // });
 
-
-
 //Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/contacts', [ContactController::class, 'store']);
-        Route::get('/contacts', [ContactController::class, 'index']);
-        Route::get('/contacts/{id}', [ContactController::class, 'show']);
-        Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);
+Route::post('/contacts', [ContactController::class, 'store']);
+Route::get('/contacts', [ContactController::class, 'index']);
+Route::get('/contacts/count', [ContactController::class, 'getCount']);
+Route::get('/contacts/mark/{id}', [ContactController::class, 'markAsRead']);
+Route::get('/contacts/{id}', [ContactController::class, 'show']);
+Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);
+
 //});
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/register', [AuthController::class, 'register']);
+// Route::post('/login', [AuthController::class, 'login']);
